@@ -3,7 +3,10 @@ package api
 import (
 	"github.com/astaxie/beego"
 	"time"
+	"github.com/jepsonwu/inchat_go/customize/response"
+	"github.com/astaxie/beego/validation"
 	"fmt"
+	"os"
 )
 
 type BaseController struct {
@@ -11,25 +14,71 @@ type BaseController struct {
 }
 
 type Response struct {
-	code    int32
-	message string
-	data    interface{}
-	time    int64
+	*response.Status
+	Data interface{} `json:"data"`
+	Time int64 `json:"time"`
 }
 
-var responseResult = &Response{} //定义变量  var re *dd 错误
-
-func (c *BaseController) success(data interface{}) {
-	responseResult.code = 0
-	responseResult.message = ""
-	responseResult.data = data
-	responseResult.time = time.Now().Unix()
-	fmt.Println(responseResult)
-	return
-	c.Data["json"] = responseResult
-	c.ServeJSON()
+type Paginate struct {
+	Page    uint64
+	PerPage uint64
 }
 
-//func failure() {
-//
-//}
+type PaginateLastId struct {
+	LastId  string `valid:"Required"`
+	PerPage uint64 `valid:"Numeric"`
+}
+
+const (
+	RESPONSE_JSON = "json"
+	RESPONSE_XML  = "xml"
+)
+
+var (
+	valid *validation.Validation = &validation.Validation{}
+
+	responseResult *Response = &Response{}
+	responseType   string    = "json"
+)
+
+func (c *BaseController) Valid() {
+	getParams := &GetValidation{}
+	//getParams.LastId = ""
+	getParams.PerPage = 1
+
+	r, err := valid.Valid(getParams)
+	fmt.Println(r)
+	os.Exit(0)
+	if err != nil {
+		c.Failure(response.SYSTEM_ERROR)
+	}
+
+	if !r {
+		for _, err := range valid.Errors {
+			fmt.Println(err.Key, err.Message)
+		}
+	}
+}
+
+func (c *BaseController) Success(data interface{}) {
+	responseResult.Status = response.SUCCESS
+	responseResult.Data = data
+	responseResult.Time = time.Now().Unix()
+
+	switch responseType {
+	case RESPONSE_JSON:
+		c.Data[RESPONSE_JSON] = responseResult
+		c.ServeJSON()
+	}
+}
+
+func (c *BaseController) Failure(status *response.Status) {
+	responseResult.Status = status
+	responseResult.Time = time.Now().Unix()
+
+	switch responseType {
+	case RESPONSE_JSON:
+		c.Data[RESPONSE_JSON] = responseResult
+		c.ServeJSON()
+	}
+}

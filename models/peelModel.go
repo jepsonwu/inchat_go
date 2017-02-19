@@ -1,15 +1,19 @@
 package models
 
 type Peel struct {
-	id       uint64
-	user_id  uint64
-	location string
+	Id       uint64 `json:"id"`
+	UserId   uint64 `json:"user_id"`
+	Location string `json:"location"`
+}
+
+func NewPeel() *Peel {
+	return &Peel{}
 }
 
 func (peel *Peel) GetByPrimary() *Peel {
-	peel.id = 1
-	peel.user_id = 10098
-	peel.location = "杭州"
+	peel.Id = 1
+	peel.UserId = 10098
+	peel.Location = "杭州"
 
 	return peel
 }
