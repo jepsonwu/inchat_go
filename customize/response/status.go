@@ -21,6 +21,12 @@ func GetStatusByMap(name string) *Status {
 var (
 	StatusMap = make(map[string]*Status)
 
-	SUCCESS      = NewResponseStatus("success", 0, "success") //success
+	SUCCESS = NewResponseStatus("success", 0, "success") //success
 	SYSTEM_ERROR = NewResponseStatus("system_error", 100, "system error")
+
+	LAST_ID_INVALID = NewResponseStatus("last_id_invalid", 101, "last_id invalid")
+	PAGE_INVALID = NewResponseStatus("page_invalid", 101, "page invalid")
+	PER_PAGE_INVALID = NewResponseStatus("per_page_invalid", 101, "per_page invalid")
+
+	PEEL_ID_INVALID = NewResponseStatus("peel_id_invalid", 101, "peel_id invalid")
 )
